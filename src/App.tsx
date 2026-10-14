@@ -183,13 +183,8 @@ export default function App() {
         .setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
       if (!stale()) {
-        // speaker.current = null
-        // sfx.duck(false)
-        // music.duck(false)
         store.getState().setActiveTool(null)
-        // music.working(false)
-        // Stay open — typing-only keeps the bar visible for follow-up
-        // listen(FOLLOW_UP_MS)
+        store.getState().setPhase('dormant')
       }
     }
   }

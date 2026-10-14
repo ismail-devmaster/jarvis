@@ -440,6 +440,12 @@ export async function ask(
             handlers.onTool(prettyToolName(msg.name))
             break
 
+          case 'confirm':
+            // Confirmation request from server — hold ask() until approved
+            // User responds via UI; approval must match msg.ask === id
+            console.log('[jarvis] confirmation requested:', (msg as any).tool, (msg as any).args)
+            // For now: log only; full UI protocol needs App integration (separate)
+            break
           case 'done':
             finish(msg.text ?? '')
             break

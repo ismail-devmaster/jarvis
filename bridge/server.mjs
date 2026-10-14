@@ -21,6 +21,8 @@ import { displayServer } from './panels.mjs'
 import { uiServer } from './ui.mjs'
 import { chromeAvailable, chromeServer } from './chrome.mjs'
 import { visionServer } from './vision.mjs'
+import { terminalServer } from './terminal.mjs'
+import { fsServer } from './fs.mjs'
 import { homedir, tmpdir } from 'node:os'
 import { readFileSync, realpathSync } from 'node:fs'
 import { readFile, realpath, stat } from 'node:fs/promises'
@@ -265,7 +267,7 @@ function decideTool(name) {
     // a write and would hold the whole surface back behind ALLOW_WRITES.
     if (server === 'jarvis' || server === 'jarvis_ui') return true
 
-    // The browser server gates itself, at construction: chromeServer() only
+    // The browser server gates itself, at construction: chromeServer(); terminalServer() only
     // builds the acting tools — click, type, form input, close tab — when
     // ALLOW_WRITES is set, so anything that reaches here at all is something
     // the same policy has already permitted. Deciding it a second time by
@@ -1214,6 +1216,15 @@ wss.on('connection', (socket) => {
         jarvis_chrome: chromeServer({ allowWrites: ALLOW_WRITES }),
         // The camera, which unlike everything else here has to ask and wait.
         jarvis_eyes: visionServer(ask),
+        jarvis_terminal: terminalServer,
+        jarvis_filesystem: fsServer,
+        jarvis_github: {
+          type: 'stdio',
+          command: 'docker',
+          args: ['run', '--rm', '--read-only', '--toolsets', 'repos,issues,pull_requests,context', '-i', 'ghcr.io/github/github-mcp-server:latest', 'stdio'],
+          env: {},
+          alwaysLoad: true
+        }
       },
       // A plain system prompt, not the claude_code preset. The preset is
       // tuned for a coding agent — verbose, file-oriented, and a large chunk

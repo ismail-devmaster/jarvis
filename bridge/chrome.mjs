@@ -560,6 +560,7 @@ export function chromeServer({ allowWrites }) {
       {},
       async () => {
         const path = await findSocket()
+        const guard = guardToolCall({ tool: 'chrome_status', op: 'status', args: {}, target: '', risk: 'READ' }); if (guard === 'DENY') return { isError: true, content: [{ type: 'text', text: 'Denied by guard.' }] };
         if (!path) {
           return {
             content: [
@@ -587,7 +588,11 @@ export function chromeServer({ allowWrites }) {
           .catch(undefined)
           .describe('Open a fresh tab if there is nothing to act on yet. Default false.'),
       },
-      forward('tabs_context_mcp', { needsTab: false }),
+      async (args) => {
+        const guard = guardToolCall({ tool: 'chrome_tabs', op: 'tabs', args: args, target: '', risk: 'READ' })
+        if (guard === 'DENY') return { isError: true, content: [{ type: 'text', text: 'Denied by guard.' }] }
+        return forward('tabs_context_mcp', { needsTab: false })({ createIfEmpty: false })
+      },
     ),
 
     tool(
